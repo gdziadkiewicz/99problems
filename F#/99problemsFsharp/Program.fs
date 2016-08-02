@@ -9,8 +9,8 @@
 let p1 l =  Seq.last l
 
 let rec p12 = function
-    | hd :: [] -> hd
-    | hd :: tl -> p12 tl
+    | [hd] -> hd
+    | _ :: tl -> p12 tl
     | _ -> failwith "Empty list."
 
 //P02 (*) Find the last but one box of a list.
@@ -42,7 +42,7 @@ let p5 l = l |> Seq.toList |> List.rev
 
 //P06 (*) Find out whether a list is a palindrome.
 //A palindrome can be read forward or backward; e.g. (x a m a x).
-let p6 l = List.forall2 (fun i k -> i = k ) (p5 l)  (Seq.toList l) 
+let p6 l = List.forall2 (=) (p5 l)  (Seq.toList l) 
 
 
 //P07 (**) Flatten a nested list structure.
@@ -105,6 +105,35 @@ let p10 l =
     let transform t =
         (List.head t, List.length t)
     l |> p9 |> List.map transform
+
+//Problem 11
+//(*) Modified run-length encoding.
+//
+//Modify the result of problem 10 in such a way that if an element has no duplicates it is simply copied into the result list. Only elements with duplicates are transferred as (N E) lists.
+//
+//Example:
+//
+//* (encode-modified '(a a a a b c c a a d e e e e))
+//((4 A) B (2 C) (2 A) D (4 E))
+//Example in Haskell:
+//
+//P11> encodeModified "aaaabccaadeeee"
+//[Multiple 4 'a',Single 'b',Multiple 2 'c',
+// Multiple 2 'a',Single 'd',Multiple 4 'e']
+//Solutions
+type Pies = |Single of char | Multiple of int*char
+let encodeModified xs =
+    let f = function
+        |(1, c) -> Single c
+        |(l, c) -> Multiple (l, c)
+    let rec folder (results:Pies list) (l, c) (xs:char list) : Pies list =
+         match xs with
+            | [] -> results @ [f (l, c)]  
+            | x::xs when x = c -> folder results (l+1, x) xs  
+            | x::xs -> folder (results @ [f (l,c)]) (1, x) xs  
+    match xs with
+        | [] -> []
+        | x::xs -> folder [] (1, x) xs
 
 
 [<EntryPoint>]
